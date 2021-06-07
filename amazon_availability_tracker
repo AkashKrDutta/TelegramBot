@@ -5,6 +5,7 @@ import json
 import sys
 import urllib
 import pickle
+import os
 
 # Amazon Session
 headers = {"Accept-Language": "en_US", "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"}
@@ -25,7 +26,8 @@ if ( "Currently unavailable." in output ) or ( "We don't know when or if this it
 message = "Amazon stock available at " + amazonUrl
 botSession = requests.session()
 data = {}
-with open('bot.config','rb') as f:
+scriptDir= os.path.dirname(os.path.realpath(__file__))
+with open(scriptDir + '/bot.config','rb') as f:
     data = pickle.load(f)
 botToken = data['botToken']
 botChatIDs = data['botChatIDs']

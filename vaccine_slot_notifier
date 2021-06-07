@@ -4,6 +4,7 @@ import datetime
 import json
 import sys
 import urllib
+import os
 
 # Cowin Session
 cowinSession = requests.session()
@@ -35,7 +36,8 @@ if(vaccineSlots == ""):
 # Bot Session
 botSession = requests.session()
 data = {}
-with open('bot.config','rb') as f:
+scriptDir= os.path.dirname(os.path.realpath(__file__))
+with open(scriptDir + '/bot.config','rb') as f:
     data = pickle.load(f)
 botToken = data['botToken']
 botChatIDs = data['botChatIDs']
