@@ -1,0 +1,5 @@
+[Unit]
+Description=Alert on vaccine availability
+[Service]
+ExecStart=/bin/bash -c 'exec /home/akd/repo/TelegramBot/vaccine_slot_notifier 1>>/home/akd/repo/TelegramBot/vaccine_log.txt 2>&1'
+

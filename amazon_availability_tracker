@@ -1,0 +1,36 @@
+#! /usr/bin/env python3
+import requests
+import datetime
+import json
+import sys
+import urllib
+import pickle
+
+# Amazon Session
+headers = {"Accept-Language": "en_US", "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"}
+amazonUrl = "https://www.amazon.in/ASUS-Zephyrus-35-56cms-Moonlight-GA401II-HE021TS/dp/B08CV1CLTW"
+time = datetime.datetime.now()
+tLog = time.strftime('%H:%M %d-%m-%Y')
+rAmazon = requests.get(amazonUrl,headers=headers)
+if rAmazon.status_code != 200:
+    print ("[" + tLog + "]: Error: " + rAmazon.text)
+    sys.exit(1)
+output = rAmazon.text
+if ( "Currently unavailable." in output ) or ( "We don't know when or if this item will be back in stock." in output ):
+    print ("[" + tLog + "]: Not in stock!")
+    sys.exit(0)
+    
+
+# Bot Session
+message = "Amazon stock available at " + amazonUrl
+botSession = requests.session()
+data = {}
+with open('bot.config','rb') as f:
+    data = pickle.load(f)
+botToken = data['botToken']
+botChatIDs = data['botChatIDs']
+print ("[" + tLog + "]: Trying to send: \n" + message)
+for chatID in botChatIDs:
+    botUrl = 'https://api.telegram.org/bot' + botToken + '/sendMessage?chat_id=' + chatID + '&parse_mode=Markdown&text=' + urllib.parse.quote_plus("# *AMAZON ALERT* \n" + message)
+    rBot = botSession.get(botUrl)
+    print ("[" + tLog + "]: Sent to chat id: " + chatID + ", response: " + rBot.text)

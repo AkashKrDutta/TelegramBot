@@ -1,0 +1,8 @@
+[Unit]
+Description=Run vaccine checker every 20 secs
+[Timer]
+#OnBootSec=10
+OnUnitActiveSec=20
+AccuracySec=1
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Run amzon checker every 2 mins
+[Timer]
+OnBootSec=120
+OnUnitActiveSec=120
+AccuracySec=1
+[Install]
+WantedBy=timers.target

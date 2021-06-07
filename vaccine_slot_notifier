@@ -1,0 +1,46 @@
+#! /usr/bin/env python3
+import requests
+import datetime
+import json
+import sys
+import urllib
+
+# Cowin Session
+cowinSession = requests.session()
+cowinSession.headers = {"Accept" : "Application/json", "Accept-Language": "en_US", "User-Agent" : "Mozilla/5.0"}
+time = datetime.datetime.now()
+tLog = time.strftime('%H:%M %d-%m-%Y')
+cowinUrl = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=247&date="
+sessions = []
+for x in range(6):
+    t = time.strftime('%d-%m-%Y')
+    rCowin = cowinSession.get(cowinUrl+t)
+    if rCowin.status_code != 200:
+        print ("[" + tLog + "]: Error: " + rCowin.text)
+        sys.exit(1)
+    jVal = json.loads(rCowin.text)
+    sessions += jVal['sessions']
+    time += datetime.timedelta(days=1)
+
+vaccineSlots = ""
+for s in sessions:
+    if s['min_age_limit'] == 18 and s['available_capacity'] != 0 and s['available_capacity'] >=10:
+        vaccineSlots += s['name'] + "\[Vaccine-*" + s['vaccine'] + "*:Date-*" + s['date'] +"*:Capacity-*" +str(s['available_capacity']) + "*:Pin-*" + str(s['pincode']) + "*:Fee-*" + s['fee_type'] + "*] \n\n"
+
+
+if(vaccineSlots == ""):
+    print ("[" + tLog + "]: No available slots!")
+    sys.exit(0)
+
+# Bot Session
+botSession = requests.session()
+data = {}
+with open('bot.config','rb') as f:
+    data = pickle.load(f)
+botToken = data['botToken']
+botChatIDs = data['botChatIDs']
+print ("[" + tLog + "]: Trying to send: \n" + vaccineSlots + "to chat ids: \n" + str(botChatIDs))
+for chatID in botChatIDs:
+    botUrl = 'https://api.telegram.org/bot' + botToken + '/sendMessage?chat_id=' + chatID + '&parse_mode=Markdown&text=' + urllib.parse.quote_plus("# *FOUND SLOTS* \n\n" + vaccineSlots)
+    rBot = botSession.get(botUrl)
+    print ("[" + tLog + "]: Sent to chat id: " + chatID + ", response: " + rBot.text)

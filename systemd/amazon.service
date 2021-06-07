@@ -1,0 +1,5 @@
+[Unit]
+Description=Alert on amazon stock availability
+[Service]
+ExecStart=/bin/bash -c 'exec /home/akd/repo/TelegramBot/amazon_availability_tracker 1>>/home/akd/repo/TelegramBot/amazon_log.txt 2>&1'
+
