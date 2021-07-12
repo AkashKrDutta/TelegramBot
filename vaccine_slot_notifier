@@ -5,6 +5,7 @@ import json
 import sys
 import urllib
 import os
+import pickle
 
 # Cowin Session
 cowinSession = requests.session()
@@ -12,8 +13,9 @@ cowinSession.headers = {"Accept" : "Application/json", "Accept-Language": "en_US
 time = datetime.datetime.now()
 tLog = time.strftime('%H:%M %d-%m-%Y')
 cowinUrl = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=247&date="
+cowinUrl2 = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByDistrict?district_id=248&date="
 sessions = []
-for x in range(6):
+for x in range(3):
     t = time.strftime('%d-%m-%Y')
     rCowin = cowinSession.get(cowinUrl+t)
     if rCowin.status_code != 200:
@@ -23,9 +25,21 @@ for x in range(6):
     sessions += jVal['sessions']
     time += datetime.timedelta(days=1)
 
+
+time = datetime.datetime.now()
+for x in range(3):
+    t = time.strftime('%d-%m-%Y')
+    rCowin = cowinSession.get(cowinUrl2+t)
+    if rCowin.status_code != 200:
+        print ("[" + tLog + "]: Error: " + rCowin.text)
+        sys.exit(1)
+    jVal = json.loads(rCowin.text)
+    sessions += jVal['sessions']
+    time += datetime.timedelta(days=1)
+
 vaccineSlots = ""
 for s in sessions:
-    if s['min_age_limit'] == 18 and s['available_capacity'] != 0 and s['available_capacity'] >=10:
+    if s['min_age_limit'] != 18 and s['available_capacity'] != 0 and s['available_capacity'] >=3 and 'covishield' in s['vaccine'].lower() and 'ichagarh' not in s['name'].lower() and 'tiruldih' not in s['name'].lower():
         vaccineSlots += s['name'] + "\[Vaccine-*" + s['vaccine'] + "*:Date-*" + s['date'] +"*:Capacity-*" +str(s['available_capacity']) + "*:Pin-*" + str(s['pincode']) + "*:Fee-*" + s['fee_type'] + "*] \n\n"
 
 
